@@ -45,7 +45,7 @@
   </div>
 
   <div id="syncBar" class="sync-bar">
-    <span id="syncText">● Online (Validasi Jam Kerja Aktif)</span>
+    <span id="syncText">● Online (Sistem Siap)</span>
     <span id="queueBadge">0 antrean</span>
   </div>
 
@@ -70,7 +70,7 @@
       <option value="PIC003">Suparso</option>
     </select>
 
-    <button class="btn btn-primary" onclick="goToStep(2)">+ Tambah Kegiatan &gt;</button>
+    <button type="button" class="btn btn-primary" onclick="goToStep(2)">+ Tambah Kegiatan &gt;</button>
   </div>
 
   <!-- STEP 2: TAMBAH KEGIATAN & BAHAN -->
@@ -136,11 +136,11 @@
 
     <div style="margin-top: 20px; font-weight: bold; color: #164f45;">Pemakaian Bahan (Opsional)</div>
     <div id="bahanContainer"></div>
-    <button class="btn btn-secondary" onclick="tambahBahan()">+ Tambah Bahan</button>
+    <button type="button" class="btn btn-secondary" onclick="tambahBahan()">+ Tambah Bahan</button>
 
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goToStep(1)">&lt; Kembali</button>
-      <button class="btn btn-primary" onclick="goToStep(3)">Lanjut: Tambah TKH &gt;</button>
+      <button type="button" class="btn btn-secondary" onclick="goToStep(1)">&lt; Kembali</button>
+      <button type="button" class="btn btn-primary" onclick="goToStep(3)">Lanjut: Tambah TKH &gt;</button>
     </div>
   </div>
 
@@ -209,7 +209,7 @@
         <option value="Lubang">Lubang</option>
       </select>
 
-      <button class="btn btn-secondary" onclick="tambahTKHKeDaftar()">+ Tambah ke Daftar</button>
+      <button type="button" class="btn btn-secondary" onclick="tambahTKHKeDaftar()">+ Tambah ke Daftar</button>
     </div>
 
     <div style="margin-top: 16px; font-weight: bold;">Daftar TKH dalam Kegiatan ini:</div>
@@ -220,8 +220,8 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goToStep(2)">&lt; Kembali</button>
-      <button class="btn btn-primary" onclick="goToStep(4)">Lanjut: Preview &gt;</button>
+      <button type="button" class="btn btn-secondary" onclick="goToStep(2)">&lt; Kembali</button>
+      <button type="button" class="btn btn-primary" onclick="goToStep(4)">Lanjut: Preview &gt;</button>
     </div>
   </div>
 
@@ -231,8 +231,8 @@
     <div id="previewContent"></div>
 
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goToStep(3)">&lt; Kembali</button>
-      <button class="btn btn-primary" style="background:#23633b;" onclick="simpanSemua()">✔ Simpan Kegiatan</button>
+      <button type="button" class="btn btn-secondary" onclick="goToStep(3)">&lt; Kembali</button>
+      <button type="button" class="btn btn-primary" style="background:#23633b;" onclick="simpanSemua()">✔ Simpan Kegiatan</button>
     </div>
   </div>
 
@@ -242,7 +242,7 @@
     <div style="font-size: 20px; font-weight: bold; color: #23633b; margin-top: 10px;">Data Kegiatan Berhasil Disimpan!</div>
     <div id="suksesMsg" class="summary-box" style="margin-top: 15px;"></div>
 
-    <button class="btn btn-primary" onclick="resetApp()">Tambah Kegiatan Lagi</button>
+    <button type="button" class="btn btn-primary" onclick="resetApp()">Tambah Kegiatan Lagi</button>
   </div>
 </div>
 
@@ -266,7 +266,7 @@ function updateSyncStatus() {
 
   if (navigator.onLine) {
     bar.className = 'sync-bar';
-    txt.textContent = '● Online (Validasi Jam Kerja Aktif)';
+    txt.textContent = '● Online (Sistem Siap)';
     if (q.length > 0) syncQueue();
   } else {
     bar.className = 'sync-bar offline';
@@ -286,17 +286,23 @@ function goToStep(step) {
   if (step === 4 && draftTKH.length === 0) { alert('Minimal 1 TKH harus ditambahkan.'); return; }
 
   for (let i = 1; i <= 5; i++) {
-    document.getElementById('step' + i).classList.add('hidden');
+    const elem = document.getElementById('step' + i);
+    if (elem) elem.classList.add('hidden');
   }
-  document.getElementById('step' + step).classList.remove('hidden');
+  const target = document.getElementById('step' + step);
+  if (target) target.classList.remove('hidden');
 
   if (step === 4) renderPreview();
 }
 
 function validateStep1() {
-  if (!document.getElementById('tanggal').value) { alert('Tanggal belum diisi.'); return false; }
-  if (!document.getElementById('sektor').value) { alert('Sektor belum dipilih.'); return false; }
-  if (!document.getElementById('pic').value) { alert('Mandor belum dipilih.'); return false; }
+  const tgl = document.getElementById('tanggal').value;
+  const sek = document.getElementById('sektor').value;
+  const pic = document.getElementById('pic').value;
+
+  if (!tgl) { alert('Tanggal belum diisi.'); return false; }
+  if (!sek) { alert('Sektor belum dipilih.'); return false; }
+  if (!pic) { alert('Mandor belum dipilih.'); return false; }
   return true;
 }
 
@@ -369,7 +375,6 @@ function tambahTKHKeDaftar() {
     return;
   }
 
-  // VALIDASI JAM BENTROK (OVERLAP)
   for (let i = 0; i < draftTKH.length; i++) {
     const existing = draftTKH[i];
     if (existing.tkh.id === tkhId) {
@@ -377,7 +382,7 @@ function tambahTKHKeDaftar() {
       const endExist = timeToMinutes(existing.jamSelesai);
 
       if (startNew < endExist && endNew > startExist) {
-        alert('Gagal menambahkan!\n\nPekerja "' + namaTkh + '" sudah dimasukkan pada jam ' + existing.jamMulai + '–' + existing.jamSelesai + '.\nSatu pekerja tidak boleh dimasukkan dua kali pada jam yang sama.');
+        alert('Gagal menambahkan! Pekerja "' + namaTkh + '" sudah dimasukkan pada jam ' + existing.jamMulai + '–' + existing.jamSelesai + '. Satu pekerja tidak boleh dimasukkan dua kali pada jam yang sama.');
         return;
       }
     }
@@ -403,8 +408,8 @@ function renderTKHList() {
     d.className = 'item-card';
     d.innerHTML = `
       <b>${item.tkh.nama}</b> (${item.jamMulai}–${item.jamSelesai})<br>
-      Blok: ${item.blok} | Hasil: ${item.prestasi}${item.satuan}
-      <button class="btn btn-danger" style="margin-top:5px;" onclick="draftTKH.splice(${i},1); renderTKHList();">Hapus</button>
+      Blok: ${item.blok} | Hasil: ${item.prestasi} ${item.satuan}
+      <button type="button" class="btn btn-danger" style="margin-top:5px;" onclick="draftTKH.splice(${i},1); renderTKHList();">Hapus</button>
     `;
     c.appendChild(d);
   });
@@ -427,4 +432,77 @@ function renderPreview() {
   let html = `
     <div class="summary-box">
       <b>Tanggal:</b> ${tgl}<br>
-      <b>Sektor:</b> ${sek} | <b>Mandor
+      <b>Sektor:</b> ${sek} | <b>Mandor:</b> ${pic}<br>
+      <b>Kegiatan:</b> ${keg}
+    </div>
+    <div style="margin-top:10px; font-weight:bold;">TKH Terlibat (${draftTKH.length} orang):</div>
+  `;
+  draftTKH.forEach(x => {
+    html += `<div class="item-card">• ${x.tkh.nama} - ${x.prestasi} ${x.satuan} (Blok ${x.blok})</div>`;
+  });
+  c.innerHTML = html;
+}
+
+function simpanSemua() {
+  const payload = {
+    clientTransactionId: 'TKH-' + Date.now(),
+    tanggal: document.getElementById('tanggal').value,
+    sektor: { id: document.getElementById('sektor').value, nama: document.getElementById('sektor').options[document.getElementById('sektor').selectedIndex].text },
+    pic: { id: document.getElementById('pic').value, nama: document.getElementById('pic').options[document.getElementById('pic').selectedIndex].text },
+    kegiatan: {
+      id: document.getElementById('kegiatan').value === '__LAIN__' ? 'LAIN-' + Date.now() : document.getElementById('kegiatan').value,
+      nama: document.getElementById('kegiatan').value === '__LAIN__' ? document.getElementById('kegiatanLain').value : document.getElementById('kegiatan').options[document.getElementById('kegiatan').selectedIndex].text,
+      satuan: draftTKH[0] ? draftTKH[0].satuan : 'Batang'
+    },
+    tkhList: draftTKH,
+    bahanList: draftBahan.filter(b => b.nama)
+  };
+
+  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+  q.push(payload);
+  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
+  updateSyncStatus();
+
+  document.getElementById('suksesMsg').innerHTML = `Kegiatan disimpan ke memori HP.<br><b>ID Transaksi:</b> ${payload.clientTransactionId}`;
+  goToStep(5);
+}
+
+function syncQueue() {
+  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+  if (!q.length) return;
+  const item = q[0];
+  
+  const iframe = document.getElementById('backendBridge');
+  if (!iframe || !iframe.contentWindow) return;
+  
+  const requestId = 'REQ-' + Date.now();
+  const handler = function(e) {
+    if (e.data && e.data.type === 'TKH_BRIDGE_RESULT' && e.data.requestId === requestId) {
+      window.removeEventListener('message', handler);
+      if (e.data.ok && e.data.result && e.data.result.success) {
+        q.shift();
+        localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
+        updateSyncStatus();
+      }
+    }
+  };
+  window.addEventListener('message', handler);
+  iframe.contentWindow.postMessage({type:'TKH_BRIDGE_CALL', requestId:requestId, method:'saveFullActivity', arg:item}, '*');
+}
+
+function resetApp() {
+  draftTKH = [];
+  draftBahan = [];
+  document.getElementById('daftarTKHContainer').innerHTML = '';
+  document.getElementById('bahanContainer').innerHTML = '';
+  document.getElementById('sektor').value = '';
+  document.getElementById('pic').value = '';
+  document.getElementById('kegiatan').value = '';
+  goToStep(1);
+}
+
+window.addEventListener('online', updateSyncStatus);
+window.addEventListener('offline', updateSyncStatus);
+</script>
+</body>
+</html>
