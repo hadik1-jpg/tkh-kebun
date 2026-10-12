@@ -403,7 +403,7 @@ function renderTKHList() {
     d.className = 'item-card';
     d.innerHTML = `
       <b>${item.tkh.nama}</b> (${item.jamMulai}–${item.jamSelesai})<br>
-      Blok: ${item.blok} | Hasil: ${item.prestasi} ${item.satuan}
+      Blok: ${item.blok} | Hasil: ${item.prestasi}${item.satuan}
       <button class="btn btn-danger" style="margin-top:5px;" onclick="draftTKH.splice(${i},1); renderTKHList();">Hapus</button>
     `;
     c.appendChild(d);
@@ -427,66 +427,4 @@ function renderPreview() {
   let html = `
     <div class="summary-box">
       <b>Tanggal:</b> ${tgl}<br>
-      <b>Sektor:</b> ${sek} | <b>Mandor:</b> ${pic}<br>
-      <b>Kegiatan:</b> ${keg}
-    </div>
-    <div style="margin-top:10px; font-weight:bold;">TKH Terlibat (${draftTKH.length} orang):</div>
-  `;
-  draftTKH.forEach(x => {
-    html += `<div class="item-card">• ${x.tkh.nama} - ${x.prestasi} ${x.satuan} (Blok ${x.blok})</div>`;
-  });
-  c.innerHTML = html;
-}
-
-function simpanSemua() {
-  const payload = {
-    clientTransactionId: 'TKH-' + Date.now(),
-    tanggal: document.getElementById('tanggal').value,
-    sektor: { id: document.getElementById('sektor').value, nama: document.getElementById('sektor').options[document.getElementById('sektor').selectedIndex].text },
-    pic: { id: document.getElementById('pic').value, nama: document.getElementById('pic').options[document.getElementById('pic').selectedIndex].text },
-    kegiatan: {
-      id: document.getElementById('kegiatan').value === '__LAIN__' ? 'LAIN-' + Date.now() : document.getElementById('kegiatan').value,
-      nama: document.getElementById('kegiatan').value === '__LAIN__' ? document.getElementById('kegiatanLain').value : document.getElementById('kegiatan').options[document.getElementById('kegiatan').selectedIndex].text,
-      satuan: draftTKH[0] ? draftTKH[0].satuan : 'Batang'
-    },
-    tkhList: draftTKH,
-    bahanList: draftBahan.filter(b => b.nama)
-  };
-
-  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
-  q.push(payload);
-  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
-  updateSyncStatus();
-
-  document.getElementById('suksesMsg').innerHTML = `Kegiatan disimpan ke memori HP.<br><b>ID Transaksi:</b> ${payload.clientTransactionId}`;
-  goToStep(5);
-}
-
-function syncQueue() {
-  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
-  if (!q.length) return;
-  const item = q[0];
-  
-  const iframe = document.getElementById('backendBridge');
-  if (!iframe || !iframe.contentWindow) return;
-  
-  const requestId = 'REQ-' + Date.now();
-  const handler = function(e) {
-    if (e.data && e.data.type === 'TKH_BRIDGE_RESULT' && e.data.requestId === requestId) {
-      window.removeEventListener('message', handler);
-      if (e.data.ok && e.data.result && e.data.result.success) {
-        q.shift();
-        localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
-        updateSyncStatus();
-      }
-    }
-  };
-  window.addEventListener('message', handler);
-  iframe.contentWindow.postMessage({type:'TKH_BRIDGE_CALL', requestId:requestId, method:'saveFullActivity', arg:item}, '*');
-}
-
-window.addEventListener('online', updateSyncStatus);
-window.addEventListener('offline', updateSyncStatus);
-</script>
-</body>
-</html>
+      <b>Sektor:</b> ${sek} | <b>Mandor
