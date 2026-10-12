@@ -45,7 +45,7 @@
   </div>
 
   <div id="syncBar" class="sync-bar">
-    <span id="syncText">● Online (Pengiriman Langsung Active v3.1)</span>
+    <span id="syncText">● Online (Koneksi Langsung V3.2)</span>
     <span id="queueBadge">0 antrean</span>
   </div>
 
@@ -247,7 +247,8 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcX85N3vgbZIFGpJD-zZtJKYMJs2wKkHX5JfBRf9Ef9vqpvn6TjIDYxWUMxVRpL8U_/exec';
+// MASUKKAN URL WEB APP APPS SCRIPT ANDA DI SINI
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcX85N3vgbZIFGpJD-zZtJKYMJs2wKkHX5JfBRf9Ef9vqpvn6TjIDYxWUMxVRpL8U_/exec'.replace(/\s+/g, '');
 const OFFLINE_QUEUE_KEY = 'TKH_KEBUN_V3_QUEUE';
 let draftTKH = [];
 let draftBahan = [];
@@ -266,7 +267,7 @@ function updateSyncStatus() {
 
   if (navigator.onLine) {
     bar.className = 'sync-bar';
-    txt.textContent = '● Online (Pengiriman Langsung Active v3.1)';
+    txt.textContent = '● Online (Koneksi Langsung V3.2)';
     if (q.length > 0 && !isSyncing) syncQueue();
   } else {
     bar.className = 'sync-bar offline';
@@ -473,11 +474,15 @@ function syncQueue() {
   isSyncing = true;
   const item = q[0];
 
+  const params = new URLSearchParams();
+  params.append('action', 'saveFullActivity');
+  params.append('payload', JSON.stringify(item));
+
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'saveFullActivity', payload: item })
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: params.toString()
   }).then(function() {
     q.shift();
     localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
