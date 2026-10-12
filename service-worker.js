@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tkh-kebun-v3-cache';
+const CACHE_NAME = 'tkh-kebun-v3-cache-v31';
 const APP_SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', event => {

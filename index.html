@@ -45,7 +45,7 @@
   </div>
 
   <div id="syncBar" class="sync-bar">
-    <span id="syncText">● Online (Koneksi Langsung Aktif)</span>
+    <span id="syncText">● Online (Pengiriman Langsung Active v3.1)</span>
     <span id="queueBadge">0 antrean</span>
   </div>
 
@@ -251,8 +251,257 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLdw-kzdmiykVjN_Rr5
 const OFFLINE_QUEUE_KEY = 'TKH_KEBUN_V3_QUEUE';
 let draftTKH = [];
 let draftBahan = [];
+let isSyncing = false;
 
 window.onload = function() {
   document.getElementById('tanggal').value = new Date().toISOString().substring(0,10);
   updateSyncStatus();
 };
+
+function updateSyncStatus() {
+  const bar = document.getElementById('syncBar');
+  const txt = document.getElementById('syncText');
+  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+  document.getElementById('queueBadge').textContent = q.length + ' antrean';
+
+  if (navigator.onLine) {
+    bar.className = 'sync-bar';
+    txt.textContent = '● Online (Pengiriman Langsung Active v3.1)';
+    if (q.length > 0 && !isSyncing) syncQueue();
+  } else {
+    bar.className = 'sync-bar offline';
+    txt.textContent = '● Offline';
+  }
+}
+
+function timeToMinutes(timeStr) {
+  if (!timeStr) return 0;
+  const parts = timeStr.split(':');
+  return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+}
+
+function goToStep(step) {
+  if (step === 2 && !validateStep1()) return;
+  if (step === 3 && !validateStep2()) return;
+  if (step === 4 && draftTKH.length === 0) { alert('Minimal 1 TKH harus ditambahkan.'); return; }
+
+  for (let i = 1; i <= 5; i++) {
+    const elem = document.getElementById('step' + i);
+    if (elem) elem.classList.add('hidden');
+  }
+  const target = document.getElementById('step' + step);
+  if (target) target.classList.remove('hidden');
+
+  if (step === 4) renderPreview();
+}
+
+function validateStep1() {
+  const tgl = document.getElementById('tanggal').value;
+  const sek = document.getElementById('sektor').value;
+  const pic = document.getElementById('pic').value;
+
+  if (!tgl) { alert('Tanggal belum diisi.'); return false; }
+  if (!sek) { alert('Sektor belum dipilih.'); return false; }
+  if (!pic) { alert('Mandor belum dipilih.'); return false; }
+  return true;
+}
+
+function validateStep2() {
+  const k = document.getElementById('kegiatan').value;
+  if (!k) { alert('Kegiatan belum dipilih.'); return false; }
+  if (k === '__LAIN__' && !document.getElementById('kegiatanLain').value.trim()) {
+    alert('Nama kegiatan lain belum diisi.'); return false;
+  }
+  return true;
+}
+
+function kegiatanChanged() {
+  const k = document.getElementById('kegiatan').value;
+  if (k === '__LAIN__') document.getElementById('kegiatanLainBox').classList.remove('hidden');
+  else document.getElementById('kegiatanLainBox').classList.add('hidden');
+}
+
+function tambahBahan() {
+  draftBahan.push({ id: '', nama: '', jumlah: '', satuan: '' });
+  renderBahanRows();
+}
+
+function renderBahanRows() {
+  const c = document.getElementById('bahanContainer');
+  c.innerHTML = '';
+  draftBahan.forEach(function(item, i) {
+    const d = document.createElement('div');
+    d.className = 'item-card';
+    d.innerHTML = `
+      <label>Bahan #${i+1}</label>
+      <select onchange="draftBahan[${i}].id=this.value; draftBahan[${i}].nama=this.options[this.selectedIndex].text">
+        <option value="">-- Pilih Bahan --</option>
+        <option value="1">Pertamax</option>
+        <option value="2">Dexlite</option>
+        <option value="3">Pupuk NPK</option>
+        <option value="4">Pupuk Urea</option>
+        <option value="5">Pupuk KCL</option>
+        <option value="6">Herbisida RoundUp</option>
+        <option value="7">Oli Mesin</option>
+      </select>
+      <div class="row">
+        <div><label>Jumlah</label><input type="number" oninput="draftBahan[${i}].jumlah=this.value"></div>
+        <div><label>Satuan</label><input type="text" placeholder="Kg/Liter" oninput="draftBahan[${i}].satuan=this.value"></div>
+      </div>
+    `;
+    c.appendChild(d);
+  });
+}
+
+function tambahTKHKeDaftar() {
+  const selectElem = document.getElementById('selectTKH');
+  const tkhId = selectElem.value;
+  const namaTkh = selectElem.options[selectElem.selectedIndex].text;
+  const jamM = document.getElementById('jamMulai').value;
+  const jamS = document.getElementById('jamAkhir').value;
+  const blok = document.getElementById('blok').value.trim();
+  const pres = document.getElementById('prestasi').value;
+  const sat = document.getElementById('satuanKerja').value;
+
+  if (!tkhId || !jamM || !jamS || !blok || !pres || !sat) {
+    alert('Isi semua data TKH dengan lengkap'); return;
+  }
+
+  const startNew = timeToMinutes(jamM);
+  const endNew = timeToMinutes(jamS);
+
+  if (startNew >= endNew) {
+    alert('Jam akhir harus lebih besar dari jam mulai.');
+    return;
+  }
+
+  for (let i = 0; i < draftTKH.length; i++) {
+    const existing = draftTKH[i];
+    if (existing.tkh.id === tkhId) {
+      const startExist = timeToMinutes(existing.jamMulai);
+      const endExist = timeToMinutes(existing.jamSelesai);
+
+      if (startNew < endExist && endNew > startExist) {
+        alert('Gagal menambahkan! Pekerja "' + namaTkh + '" sudah dimasukkan pada jam ' + existing.jamMulai + '–' + existing.jamSelesai + '. Satu pekerja tidak boleh dimasukkan dua kali pada jam yang sama.');
+        return;
+      }
+    }
+  }
+
+  draftTKH.push({
+    tkh: { id: tkhId, nama: namaTkh, pw: '' },
+    jamMulai: jamM, jamSelesai: jamS, blok: blok, prestasi: parseFloat(pres), satuan: sat
+  });
+
+  renderTKHList();
+  selectElem.value = '';
+  document.getElementById('prestasi').value = '';
+}
+
+function renderTKHList() {
+  const c = document.getElementById('daftarTKHContainer');
+  c.innerHTML = '';
+  let tot = 0;
+  draftTKH.forEach(function(item, i) {
+    tot += item.prestasi;
+    const d = document.createElement('div');
+    d.className = 'item-card';
+    d.innerHTML = `
+      <b>${item.tkh.nama}</b> (${item.jamMulai}–${item.jamSelesai})<br>
+      Blok: ${item.blok} | Hasil: ${item.prestasi} ${item.satuan}
+      <button type="button" class="btn btn-danger" style="margin-top:5px;" onclick="draftTKH.splice(${i},1); renderTKHList();">Hapus</button>
+    `;
+    c.appendChild(d);
+  });
+
+  if (draftTKH.length > 0) {
+    document.getElementById('totalPrestasiBox').classList.remove('hidden');
+    document.getElementById('totalPrestasiVal').textContent = tot + ' ' + (draftTKH[0].satuan || '');
+  } else {
+    document.getElementById('totalPrestasiBox').classList.add('hidden');
+  }
+}
+
+function renderPreview() {
+  const c = document.getElementById('previewContent');
+  const tgl = document.getElementById('tanggal').value;
+  const sek = document.getElementById('sektor').options[document.getElementById('sektor').selectedIndex].text;
+  const pic = document.getElementById('pic').options[document.getElementById('pic').selectedIndex].text;
+  const keg = document.getElementById('kegiatan').value === '__LAIN__' ? document.getElementById('kegiatanLain').value : document.getElementById('kegiatan').options[document.getElementById('kegiatan').selectedIndex].text;
+
+  let html = `
+    <div class="summary-box">
+      <b>Tanggal:</b> ${tgl}<br>
+      <b>Sektor:</b> ${sek} | <b>Mandor:</b> ${pic}<br>
+      <b>Kegiatan:</b> ${keg}
+    </div>
+    <div style="margin-top:10px; font-weight:bold;">TKH Terlibat (${draftTKH.length} orang):</div>
+  `;
+  draftTKH.forEach(x => {
+    html += `<div class="item-card">• ${x.tkh.nama} - ${x.prestasi} ${x.satuan} (Blok ${x.blok})</div>`;
+  });
+  c.innerHTML = html;
+}
+
+function simpanSemua() {
+  const payload = {
+    clientTransactionId: 'TKH-' + Date.now(),
+    tanggal: document.getElementById('tanggal').value,
+    sektor: { id: document.getElementById('sektor').value, nama: document.getElementById('sektor').options[document.getElementById('sektor').selectedIndex].text },
+    pic: { id: document.getElementById('pic').value, nama: document.getElementById('pic').options[document.getElementById('pic').selectedIndex].text },
+    kegiatan: {
+      id: document.getElementById('kegiatan').value === '__LAIN__' ? 'LAIN-' + Date.now() : document.getElementById('kegiatan').value,
+      nama: document.getElementById('kegiatan').value === '__LAIN__' ? document.getElementById('kegiatanLain').value : document.getElementById('kegiatan').options[document.getElementById('kegiatan').selectedIndex].text,
+      satuan: draftTKH[0] ? draftTKH[0].satuan : 'Batang'
+    },
+    tkhList: draftTKH,
+    bahanList: draftBahan.filter(b => b.nama)
+  };
+
+  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+  q.push(payload);
+  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
+  updateSyncStatus();
+
+  document.getElementById('suksesMsg').innerHTML = `Kegiatan disimpan ke memori HP.<br><b>ID Transaksi:</b> ${payload.clientTransactionId}`;
+  goToStep(5);
+}
+
+function syncQueue() {
+  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+  if (!q.length || isSyncing) return;
+  isSyncing = true;
+  const item = q[0];
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'saveFullActivity', payload: item })
+  }).then(function() {
+    q.shift();
+    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
+    isSyncing = false;
+    updateSyncStatus();
+  }).catch(function(err) {
+    console.warn('Gagal sync:', err);
+    isSyncing = false;
+  });
+}
+
+function resetApp() {
+  draftTKH = [];
+  draftBahan = [];
+  document.getElementById('daftarTKHContainer').innerHTML = '';
+  document.getElementById('bahanContainer').innerHTML = '';
+  document.getElementById('sektor').value = '';
+  document.getElementById('pic').value = '';
+  document.getElementById('kegiatan').value = '';
+  goToStep(1);
+}
+
+window.addEventListener('online', updateSyncStatus);
+window.addEventListener('offline', updateSyncStatus);
+</script>
+</body>
+</html>
