@@ -474,11 +474,14 @@ function syncQueue() {
   isSyncing = true;
   const item = q[0];
 
+  // GUNAKAN SCRIPT_URL (Version 23)
+  const targetUrl = SCRIPT_URL;
+
   const params = new URLSearchParams();
   params.append('action', 'saveFullActivity');
   params.append('payload', JSON.stringify(item));
 
-  fetch(SCRIPT_URL, {
+  fetch(targetUrl, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
