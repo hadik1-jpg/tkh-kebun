@@ -4,37 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>TKH Kebun V3</title>
-  <link rel="icon" type="image/png" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="manifest" href="manifest.json">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
     body { background: #f0f4f3; color: #243238; }
     .app { max-width: 520px; margin: auto; background: #ffffff; min-height: 100vh; padding-bottom: 30px; }
-    
     .header { background: #164f45; color: white; padding: 20px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
     .header .company { font-size: 12px; opacity: 0.9; text-transform: uppercase; }
     .header h1 { margin-top: 4px; font-size: 24px; }
-
     .sync-bar { margin: 12px; padding: 10px 14px; border-radius: 10px; background: #e5f5e9; color: #23633b; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
     .sync-bar.offline { background: #fff4d8; color: #795b00; }
-
     .step-card { margin: 12px; padding: 16px; border: 1px solid #dce4e2; border-radius: 14px; background: #ffffff; }
     .step-title { font-size: 18px; font-weight: bold; color: #164f45; margin-bottom: 14px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-    
     label { display: block; margin-top: 12px; margin-bottom: 4px; font-weight: bold; font-size: 14px; color: #526066; }
-    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5d2; border-radius: 8px; font-size: 15px; background: white; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #cbd5d2; border-radius: 8px; font-size: 15px; background: white; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
     .btn { border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 12px; }
     .btn-primary { background: #164f45; color: white; }
     .btn-secondary { background: #e4f1ee; color: #164f45; }
-    .btn-danger { background: #f9e2e2; color: #b52e2e; padding: 8px 12px; font-size: 12px; width: auto; }
+    .btn-danger { background: #f9e2e2; color: #b52e2e; padding: 8px 12px; font-size: 12px; width: auto; margin-top:8px;}
     .btn-row { display: flex; gap: 10px; margin-top: 16px; }
-
     .item-card { border: 1px solid #dce4e2; border-radius: 10px; padding: 12px; margin-top: 10px; background: #fafcfb; }
-    .summary-box { background: #edf5f3; padding: 12px; border-radius: 10px; margin-top: 12px; font-size: 14px; }
-
     .hidden { display: none !important; }
   </style>
 </head>
@@ -47,513 +36,190 @@
   </div>
 
   <div id="syncBar" class="sync-bar">
-    <span id="syncText">● Online (Koneksi Langsung V3.2)</span>
-    <span id="queueBadge" onclick="kosongkanAntreanManual()" style="cursor: pointer; text-decoration: underline;" title="Ketuk untuk bersihkan antrean">0 antrean</span>
+    <span id="syncText">● Online (Server V3)</span>
+    <span id="queueBadge" onclick="clearQueue()" style="cursor: pointer; text-decoration: underline;" title="Ketuk untuk paksa reset antrean jika error">0 Antrean (Reset)</span>
   </div>
 
-  <!-- STEP 1: INFORMASI HARIAN -->
+  <!-- STEP 1: INFO -->
   <div id="step1" class="step-card">
     <div class="step-title">1. Form Informasi Harian</div>
-    <label>Tanggal</label>
-    <input type="date" id="tanggal">
-
+    <label>Tanggal</label><input type="date" id="tanggal">
     <label>Sektor</label>
     <select id="sektor">
-      <option value="">-- Pilih Sektor --</option>
-      <option value="S001">Sektor 1</option>
-      <option value="S002">Sektor 2</option>
+      <option value="">-- Pilih --</option><option value="S001">Sektor 1</option><option value="S002">Sektor 2</option>
     </select>
-
-    <label>PIC / Mandor</label>
+    <label>Mandor</label>
     <select id="pic">
-      <option value="">-- Pilih PIC / Mandor --</option>
-      <option value="PIC001">Wahyuni</option>
-      <option value="PIC002">Aroka</option>
-      <option value="PIC003">Suparso</option>
+      <option value="">-- Pilih --</option><option value="PIC001">Wahyuni</option><option value="PIC002">Aroka</option><option value="PIC003">Suparso</option>
     </select>
-
-    <button type="button" class="btn btn-primary" onclick="goToStep(2)">+ Tambah Kegiatan &gt;</button>
+    <button class="btn btn-primary" onclick="go(2)">Lanjut &gt;</button>
   </div>
 
-  <!-- STEP 2: TAMBAH KEGIATAN & BAHAN -->
+  <!-- STEP 2: KEGIATAN -->
   <div id="step2" class="step-card hidden">
-    <div class="step-title">2. Form Tambah Kegiatan</div>
-    <label>Jenis Kegiatan</label>
-    <select id="kegiatan" onchange="kegiatanChanged()">
-      <option value="">-- Pilih Kegiatan --</option>
-      <option value="1">Pemupukan NPK (TBM)</option>
-      <option value="2">Pemupukan Urea (TBM)</option>
-      <option value="3">Pemupukan KCL (TBM)</option>
-      <option value="4">Pemupukan NPK (TM)</option>
-      <option value="5">Pemupukan Urea (TM)</option>
-      <option value="6">Pemupukan KCL (TM)</option>
-      <option value="7">Pemupukan Kompos / Organik</option>
-
-      <option value="8">Penyemprotan Herbisida (Gulma)</option>
-      <option value="9">Penyemprotan Insektisida (Hama)</option>
-      <option value="10">Penyemprotan Fungisida (Penyakit)</option>
-      <option value="11">Babad / Babat Rumput Manual</option>
-      <option value="12">Babat Rumput Mekanis (Mesin)</option>
-      <option value="13">Nyiang Kiring / Piringan</option>
-
-      <option value="14">Pangkas Lepas / Bentuk (TBM)</option>
-      <option value="15">Pangkas Lepas / Produksi (TM)</option>
-      <option value="16">Pangkas Wiwilan / Tunas Air</option>
-      <option value="17">Pangkas Lepas Kepala / Toping</option>
-      <option value="18">Pangkas Rejuvenasi / Reboisasi</option>
-
-      <option value="19">Panen Petik Merah</option>
-      <option value="20">Panen Petik Campur</option>
-      <option value="21">Panen Asalan</option>
-
-      <option value="22">Sulam Tanaman Kopi</option>
-      <option value="23">Sulam Tanaman Pelindung</option>
-
-      <option value="24">Pembuatan Lubang Tanam</option>
-      <option value="25">Pembuatan Rorak / Kebun</option>
-      <option value="26">Pembersihan Saluran Air / Drainase</option>
-      <option value="27">Perbaikan Jalan Kebun / Teras</option>
-      <option value="28">Pembuatan Naungan / Pelindung</option>
-
-      <option value="29">Pengangkutan Hasil Panen</option>
-      <option value="30">Pengangkutan Pupuk / Bahan</option>
-      <option value="31">Pembersihan Kebun Umum</option>
-      <option value="__LAIN__">Pilihan Lain (Tulis Manual)</option>
+    <div class="step-title">2. Form Kegiatan</div>
+    <label>Kegiatan</label>
+    <select id="kegiatan">
+      <option value="">-- Pilih --</option><option value="1">Pemupukan NPK (TBM)</option><option value="2">Pemupukan Urea (TBM)</option><option value="11">Babad / Babat Rumput Manual</option><option value="19">Panen Petik Merah</option>
     </select>
-
-    <div id="kegiatanLainBox" class="hidden">
-      <label>Nama Kegiatan Lain</label>
-      <input type="text" id="kegiatanLain" placeholder="Tuliskan nama kegiatan">
-      <label>Satuan</label>
-      <select id="satuanKegiatanLain">
-        <option value="">-- Pilih Satuan --</option>
-        <option value="Batang">Batang</option>
-        <option value="Ha">Ha</option>
-        <option value="Kg">Kg</option>
-        <option value="Tangki">Tangki</option>
-        <option value="Lubang">Lubang</option>
-        <option value="Meter">Meter</option>
-      </select>
+    
+    <label>Bahan (Opsional)</label>
+    <select id="bahanId"><option value="">-- Tanpa Bahan --</option><option value="B1">Pupuk NPK</option><option value="B2">Dexlite</option></select>
+    <div class="row">
+      <div><label>Jml</label><input type="number" id="bahanJml" placeholder="0"></div>
+      <div><label>Sat</label><input type="text" id="bahanSat" placeholder="Kg/Lt"></div>
     </div>
-
-    <div style="margin-top: 20px; font-weight: bold; color: #164f45;">Pemakaian Bahan (Opsional)</div>
-    <div id="bahanContainer"></div>
-    <button type="button" class="btn btn-secondary" onclick="tambahBahan()">+ Tambah Bahan</button>
-
     <div class="btn-row">
-      <button type="button" class="btn btn-secondary" onclick="goToStep(1)">&lt; Kembali</button>
-      <button type="button" class="btn btn-primary" onclick="goToStep(3)">Lanjut: Tambah TKH &gt;</button>
+      <button class="btn btn-secondary" onclick="go(1)">&lt; Kembali</button>
+      <button class="btn btn-primary" onclick="go(3)">Lanjut &gt;</button>
     </div>
   </div>
 
-  <!-- STEP 3: TAMBAH TKH -->
+  <!-- STEP 3: TKH -->
   <div id="step3" class="step-card hidden">
-    <div class="step-title">3. Form Tambah TKH</div>
-    <div id="tkhInputForm" class="item-card">
+    <div class="step-title">3. Tenaga Kerja (TKH)</div>
+    <div class="item-card">
       <label>Nama TKH</label>
-      <select id="selectTKH">
-        <option value="">-- Pilih TKH --</option>
-        <option value="1707044808881001">Anita</option>
-        <option value="1703081312800002">Ari Kristianto</option>
-        <option value="1707040606010003">Arjuna Utama</option>
-        <option value="1707076002880001">Atita</option>
-        <option value="1709032412710001">Asmawi</option>
-        <option value="1709032412710002">Budi Santoso</option>
-        <option value="1709032412710003">Dedi Kurniawan</option>
-        <option value="1709032412710004">Eko Prasetyo</option>
-        <option value="1709032412710005">Fitriani</option>
-        <option value="1709032412710006">Hendrikus</option>
-        <option value="1709032412710007">Iwan Setiawan</option>
-        <option value="1709032412710008">Joko Susilo</option>
-        <option value="1709032412710009">Kartini</option>
-        <option value="1709032412710010">Luki Gunawan</option>
-        <option value="1709032412710011">Marlina</option>
-        <option value="1709032412710012">Nurdin</option>
-        <option value="1709032412710013">Oman Rohman</option>
-        <option value="1709032412710014">Putri Rahayu</option>
-        <option value="1709032412710015">Rahmat Hidayat</option>
-        <option value="1709032412710016">Samsul Bahri</option>
-        <option value="1709032412710017">Titin Sumarni</option>
-        <option value="1709032412710018">Ujang Supriatna</option>
-        <option value="1709032412710019">Yayan Mulyana</option>
-        <option value="1709032412710020">Zulkifli</option>
+      <select id="tkhId">
+        <option value="">-- Pilih --</option><option value="T001">Anita</option><option value="T002">Ari Kristianto</option>
       </select>
-
       <div class="row">
-        <div>
-          <label>Jam Mulai</label>
-          <input type="time" id="jamMulai" value="07:30">
-        </div>
-        <div>
-          <label>Jam Akhir</label>
-          <input type="time" id="jamAkhir" value="11:00">
-        </div>
+        <div><label>Mulai</label><input type="time" id="jamM" value="07:30"></div>
+        <div><label>Selesai</label><input type="time" id="jamS" value="11:00"></div>
       </div>
-
       <div class="row">
-        <div>
-          <label>Blok</label>
-          <input type="text" id="blok" placeholder="Contoh: C10">
-        </div>
-        <div>
-          <label>Prestasi</label>
-          <input type="number" step="any" id="prestasi" placeholder="Jumlah">
-        </div>
+        <div><label>Blok</label><input type="text" id="blok" placeholder="C10"></div>
+        <div><label>Hasil</label><input type="number" id="hasil" placeholder="Jml"></div>
       </div>
-
-      <label>Satuan Pekerjaan</label>
-      <select id="satuanKerja">
-        <option value="Batang">Batang</option>
-        <option value="Ha">Ha</option>
-        <option value="Kg">Kg</option>
-        <option value="Liter">Liter</option>
-        <option value="Tangki">Tangki</option>
-        <option value="Lubang">Lubang</option>
-      </select>
-
-      <button type="button" class="btn btn-secondary" onclick="tambahTKHKeDaftar()">+ Tambah ke Daftar</button>
+      <label>Satuan</label><select id="satuanKerja"><option value="Batang">Batang</option><option value="Kg">Kg</option></select>
+      <button class="btn btn-secondary" onclick="addTkh()">+ Tambah Pekerja</button>
     </div>
-
-    <div style="margin-top: 16px; font-weight: bold;">Daftar TKH dalam Kegiatan ini:</div>
-    <div id="daftarTKHContainer"></div>
-
-    <div id="totalPrestasiBox" class="summary-box hidden">
-      <b>Total Prestasi Kegiatan:</b> <span id="totalPrestasiVal">0</span>
-    </div>
-
+    
+    <div id="listTkh"></div>
     <div class="btn-row">
-      <button type="button" class="btn btn-secondary" onclick="goToStep(2)">&lt; Kembali</button>
-      <button type="button" class="btn btn-primary" onclick="goToStep(4)">Lanjut: Preview &gt;</button>
+      <button class="btn btn-secondary" onclick="go(2)">&lt; Kembali</button>
+      <button class="btn btn-primary" onclick="go(4)">Preview &gt;</button>
     </div>
   </div>
 
   <!-- STEP 4: PREVIEW -->
   <div id="step4" class="step-card hidden">
-    <div class="step-title">4. Preview Sebelum Disimpan</div>
-    <div id="previewContent"></div>
-
-    <div class="btn-row">
-      <button type="button" class="btn btn-secondary" onclick="goToStep(3)">&lt; Kembali</button>
-      <button type="button" class="btn btn-primary" style="background:#23633b;" onclick="simpanSemua()">✔ Simpan Kegiatan</button>
-    </div>
-  </div>
-
-  <!-- STEP 5: SUKSES -->
-  <div id="step5" class="step-card hidden" style="text-align: center;">
-    <div style="font-size: 48px;">✔</div>
-    <div style="font-size: 20px; font-weight: bold; color: #23633b; margin-top: 10px;">Data Kegiatan Berhasil Disimpan!</div>
-    <div id="suksesMsg" class="summary-box" style="margin-top: 15px;"></div>
-
-    <button type="button" class="btn btn-primary" onclick="resetApp()">Tambah Kegiatan Lagi</button>
+    <div class="step-title">4. Simpan</div>
+    <button class="btn btn-primary" style="background:#23633b;" onclick="saveData()">✔ SIMPAN SEKARANG</button>
+    <button class="btn btn-secondary" onclick="go(3)">&lt; Batal / Edit</button>
   </div>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkKhZR-B50Iex3LoNNcg4o8Va3crI9ynTaaM06PNRL7-0taJii0NxC1P-SYSCq-cgV/exec';
-const OFFLINE_QUEUE_KEY = 'TKH_KEBUN_V3_QUEUE';
-let draftTKH = [];
-let draftBahan = [];
+// =============== PERHATIAN: PASTE URL DEPLOYMENT BARU DI SINI ===============
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwL6NATZcHPja6S6cPpMulkYDki0GPAybRgCJgnyJm3JbnR3fbX0WCTZfQ0SVUMMDBI/exec';
+// ==============================================================================
+
+const QUEUE_KEY = 'TKH_V3_Q';
+let draftTkh = [];
 let isSyncing = false;
 
 window.onload = function() {
-  document.getElementById('tanggal').value = new Date().toISOString().substring(0, 10);
-  updateSyncStatus();
-  if (navigator.onLine) {
-    syncQueue();
-  }
+  document.getElementById('tanggal').value = new Date().toISOString().substring(0,10);
+  updateUI();
+  if (navigator.onLine) runSync();
 };
 
-function updateSyncStatus() {
-  const bar = document.getElementById('syncBar');
-  const txt = document.getElementById('syncText');
-  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
-  document.getElementById('queueBadge').textContent = q.length + ' antrean';
-
-  if (navigator.onLine) {
-    bar.className = 'sync-bar';
-    txt.textContent = '● Online (Koneksi Langsung V3.2)';
-    if (q.length > 0 && !isSyncing) {
-      syncQueue();
-    }
-  } else {
-    bar.className = 'sync-bar offline';
-    txt.textContent = '● Offline';
-  }
+function go(step) {
+  for(let i=1; i<=4; i++) document.getElementById('step'+i).classList.add('hidden');
+  document.getElementById('step'+step).classList.remove('hidden');
 }
 
-function timeToMinutes(timeStr) {
-  if (!timeStr) return 0;
-  const parts = timeStr.split(':');
-  return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+function addTkh() {
+  const sel = document.getElementById('tkhId');
+  if(!sel.value) return alert('Pilih TKH');
+  draftTkh.push({
+    tkh: { id: sel.value, nama: sel.options[sel.selectedIndex].text },
+    jamMulai: document.getElementById('jamM').value,
+    jamSelesai: document.getElementById('jamS').value,
+    blok: document.getElementById('blok').value,
+    prestasi: document.getElementById('hasil').value,
+    satuan: document.getElementById('satuanKerja').value
+  });
+  renderTkh();
 }
 
-function goToStep(step) {
-  if (step === 2 && !validateStep1()) return;
-  if (step === 3 && !validateStep2()) return;
-  if (step === 4 && draftTKH.length === 0) { alert('Minimal 1 TKH harus ditambahkan.'); return; }
-
-  for (let i = 1; i <= 5; i++) {
-    const elem = document.getElementById('step' + i);
-    if (elem) elem.classList.add('hidden');
-  }
-  const target = document.getElementById('step' + step);
-  if (target) target.classList.remove('hidden');
-
-  if (step === 4) renderPreview();
-}
-
-function validateStep1() {
-  const tgl = document.getElementById('tanggal').value;
-  const sek = document.getElementById('sektor').value;
-  const pic = document.getElementById('pic').value;
-
-  if (!tgl) { alert('Tanggal belum diisi.'); return false; }
-  if (!sek) { alert('Sektor belum dipilih.'); return false; }
-  if (!pic) { alert('Mandor belum dipilih.'); return false; }
-  return true;
-}
-
-function validateStep2() {
-  const k = document.getElementById('kegiatan').value;
-  if (!k) { alert('Kegiatan belum dipilih.'); return false; }
-  if (k === '__LAIN__' && !document.getElementById('kegiatanLain').value.trim()) {
-    alert('Nama kegiatan lain belum diisi.'); return false;
-  }
-  return true;
-}
-
-function kegiatanChanged() {
-  const k = document.getElementById('kegiatan').value;
-  if (k === '__LAIN__') document.getElementById('kegiatanLainBox').classList.remove('hidden');
-  else document.getElementById('kegiatanLainBox').classList.add('hidden');
-}
-
-function tambahBahan() {
-  draftBahan.push({ id: '', nama: '', jumlah: '', satuan: '' });
-  renderBahanRows();
-}
-
-function renderBahanRows() {
-  const c = document.getElementById('bahanContainer');
+function renderTkh() {
+  const c = document.getElementById('listTkh');
   c.innerHTML = '';
-  draftBahan.forEach(function(item, i) {
-    const d = document.createElement('div');
-    d.className = 'item-card';
-    d.innerHTML = `
-      <label>Bahan #${i+1}</label>
-      <select onchange="draftBahan[${i}].id=this.value; draftBahan[${i}].nama=this.options[this.selectedIndex].text">
-        <option value="">-- Pilih Bahan --</option>
-        <option value="1">Pertamax</option>
-        <option value="2">Dexlite</option>
-        <option value="3">Pupuk NPK</option>
-        <option value="4">Pupuk Urea</option>
-        <option value="5">Pupuk KCL</option>
-        <option value="6">Herbisida RoundUp</option>
-        <option value="7">Oli Mesin</option>
-      </select>
-      <div class="row">
-        <div><label>Jumlah</label><input type="number" oninput="draftBahan[${i}].jumlah=this.value"></div>
-        <div><label>Satuan</label><input type="text" placeholder="Kg/Liter" oninput="draftBahan[${i}].satuan=this.value"></div>
-      </div>
-    `;
-    c.appendChild(d);
+  draftTkh.forEach((t, i) => {
+    c.innerHTML += `<div class="item-card"><b>${t.tkh.nama}</b> (Blok ${t.blok}) - ${t.prestasi} ${t.satuan} <button class="btn-danger" onclick="draftTkh.splice(${i},1); renderTkh();">Hapus</button></div>`;
   });
 }
 
-function tambahTKHKeDaftar() {
-  const selectElem = document.getElementById('selectTKH');
-  const tkhId = selectElem.value;
-  const namaTkh = selectElem.options[selectElem.selectedIndex].text;
-  const jamM = document.getElementById('jamMulai').value;
-  const jamS = document.getElementById('jamAkhir').value;
-  const blok = document.getElementById('blok').value.trim();
-  const pres = document.getElementById('prestasi').value;
-  const sat = document.getElementById('satuanKerja').value;
+function saveData() {
+  if(!draftTkh.length) return alert('Belum ada TKH!');
+  
+  const selSek = document.getElementById('sektor');
+  const selPic = document.getElementById('pic');
+  const selKeg = document.getElementById('kegiatan');
+  const selBah = document.getElementById('bahanId');
 
-  if (!tkhId || !jamM || !jamS || !blok || !pres || !sat) {
-    alert('Isi semua data TKH dengan lengkap'); return;
-  }
-
-  const startNew = timeToMinutes(jamM);
-  const endNew = timeToMinutes(jamS);
-
-  if (startNew >= endNew) {
-    alert('Jam akhir harus lebih besar dari jam mulai.');
-    return;
-  }
-
-  for (let i = 0; i < draftTKH.length; i++) {
-    const existing = draftTKH[i];
-    if (existing.tkh.id === tkhId) {
-      const startExist = timeToMinutes(existing.jamMulai);
-      const endExist = timeToMinutes(existing.jamSelesai);
-
-      if (startNew < endExist && endNew > startExist) {
-        alert('Gagal menambahkan! Pekerja "' + namaTkh + '" sudah dimasukkan pada jam ' + existing.jamMulai + '–' + existing.jamSelesai + '. Satu pekerja tidak boleh dimasukkan dua kali pada jam yang sama.');
-        return;
-      }
-    }
-  }
-
-  draftTKH.push({
-    tkh: { id: tkhId, nama: namaTkh, pw: '' },
-    jamMulai: jamM, jamSelesai: jamS, blok: blok, prestasi: parseFloat(pres), satuan: sat
-  });
-
-  renderTKHList();
-  selectElem.value = '';
-  document.getElementById('prestasi').value = '';
-}
-
-function renderTKHList() {
-  const c = document.getElementById('daftarTKHContainer');
-  c.innerHTML = '';
-  let tot = 0;
-  draftTKH.forEach(function(item, i) {
-    tot += item.prestasi;
-    const d = document.createElement('div');
-    d.className = 'item-card';
-    d.innerHTML = `
-      <b>${item.tkh.nama}</b> (${item.jamMulai}–${item.jamSelesai})<br>
-      Blok: ${item.blok} | Hasil: ${item.prestasi} ${item.satuan}
-      <button type="button" class="btn btn-danger" style="margin-top:5px;" onclick="draftTKH.splice(${i},1); renderTKHList();">Hapus</button>
-    `;
-    c.appendChild(d);
-  });
-
-  if (draftTKH.length > 0) {
-    document.getElementById('totalPrestasiBox').classList.remove('hidden');
-    document.getElementById('totalPrestasiVal').textContent = tot + ' ' + (draftTKH[0].satuan || '');
-  } else {
-    document.getElementById('totalPrestasiBox').classList.add('hidden');
-  }
-}
-
-function renderPreview() {
-  const c = document.getElementById('previewContent');
-  const tgl = document.getElementById('tanggal').value;
-  const sek = document.getElementById('sektor').options[document.getElementById('sektor').selectedIndex].text;
-  const pic = document.getElementById('pic').options[document.getElementById('pic').selectedIndex].text;
-  const keg = document.getElementById('kegiatan').value === '__LAIN__' ? document.getElementById('kegiatanLain').value : document.getElementById('kegiatan').options[document.getElementById('kegiatan').selectedIndex].text;
-
-  let html = `
-    <div class="summary-box">
-      <b>Tanggal:</b> ${tgl}<br>
-      <b>Sektor:</b> ${sek} | <b>Mandor:</b> ${pic}<br>
-      <b>Kegiatan:</b> ${keg}
-    </div>
-    <div style="margin-top:10px; font-weight:bold;">TKH Terlibat (${draftTKH.length} orang):</div>
-  `;
-  draftTKH.forEach(x => {
-    html += `<div class="item-card">• ${x.tkh.nama} - ${x.prestasi} ${x.satuan} (Blok ${x.blok})</div>`;
-  });
-  c.innerHTML = html;
-}
-
-function simpanSemua() {
   const payload = {
-    clientTransactionId: 'TKH-' + Date.now(),
+    clientTransactionId: 'TX-' + Date.now(),
     tanggal: document.getElementById('tanggal').value,
-    sektor: { id: document.getElementById('sektor').value, nama: document.getElementById('sektor').options[document.getElementById('sektor').selectedIndex].text },
-    pic: { id: document.getElementById('pic').value, nama: document.getElementById('pic').options[document.getElementById('pic').selectedIndex].text },
-    kegiatan: {
-      id: document.getElementById('kegiatan').value === '__LAIN__' ? 'LAIN-' + Date.now() : document.getElementById('kegiatan').value,
-      nama: document.getElementById('kegiatan').value === '__LAIN__' ? document.getElementById('kegiatanLain').value : document.getElementById('kegiatan').options[document.getElementById('kegiatan').selectedIndex].text,
-      satuan: draftTKH[0] ? draftTKH[0].satuan : 'Batang'
-    },
-    tkhList: draftTKH,
-    bahanList: draftBahan.filter(b => b.nama)
+    sektor: { id: selSek.value, nama: selSek.options[selSek.selectedIndex].text },
+    pic: { id: selPic.value, nama: selPic.options[selPic.selectedIndex].text },
+    kegiatan: { id: selKeg.value, nama: selKeg.options[selKeg.selectedIndex].text, satuan: draftTkh[0].satuan },
+    tkhList: draftTkh,
+    bahanList: selBah.value ? [{ id: selBah.value, nama: selBah.options[selBah.selectedIndex].text, jumlah: document.getElementById('bahanJml').value, satuan: document.getElementById('bahanSat').value }] : []
   };
 
-  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+  const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
   q.push(payload);
-  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
-  updateSyncStatus();
-
-  document.getElementById('suksesMsg').innerHTML = `Kegiatan disimpan ke memori HP.<br><b>ID Transaksi:</b> ${payload.clientTransactionId}`;
-  goToStep(5);
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
+  
+  draftTkh = []; renderTkh(); go(1);
+  alert('Data masuk antrean (memori HP).');
+  updateUI();
+  runSync();
 }
 
-function syncQueue() {
-  const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+// MESIN SINKRONISASI BYPASS CORS GET
+function runSync() {
+  const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
   if (!q.length || isSyncing) return;
+  
   isSyncing = true;
-
-  const bar = document.getElementById('syncBar');
-  const txt = document.getElementById('syncText');
-  txt.textContent = '⏳ Sedang mengirim data ke spreadsheet...';
-
+  document.getElementById('syncText').textContent = '⏳ Mengirim ke Google Sheet...';
+  
   const item = q[0];
-  const params = new URLSearchParams();
-  params.append('action', 'saveFullActivity');
-  params.append('payload', JSON.stringify(item));
+  const url = SCRIPT_URL + "?payload=" + encodeURIComponent(JSON.stringify(item));
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
-  })
+  fetch(url, { method: 'GET', mode: 'no-cors' })
   .then(() => {
-    // Karena no-cors selalu selesai di .then setelah request terkirim
-    hapusAntreanSukses();
+    setTimeout(() => {
+      const liveQ = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+      liveQ.shift(); // Buang yang berhasil
+      localStorage.setItem(QUEUE_KEY, JSON.stringify(liveQ));
+      isSyncing = false;
+      updateUI();
+      if(liveQ.length > 0) runSync();
+    }, 1500); // Tunggu server nulis ke 3 sheet
   })
   .catch((err) => {
-    // Jika benar-benar offline / gagal jaringan
-    console.warn('Gagal sync:', err);
-    isSyncing = false;
-    updateSyncStatus();
+    isSyncing = false; updateUI();
   });
 }
 
-function hapusAntreanSukses() {
-  // Beri jeda 1 detik agar Google Apps Script tuntas menulis ke semua tab
-  setTimeout(() => {
-    const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
-    q.shift();
-    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
-    isSyncing = false;
-    updateSyncStatus();
-    
-    // Kirim item berikutnya jika ada antrean tersisa
-    const remaining = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
-    if (remaining.length > 0) {
-      syncQueue();
-    }
-  }, 1000);
+function updateUI() {
+  const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+  document.getElementById('queueBadge').textContent = q.length + ' Antrean (Reset)';
+  document.getElementById('syncText').textContent = navigator.onLine ? '● Online (Siap Kirim)' : '● Offline';
 }
-function selesaikanAntrean() {
-  const currentQ = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
-  currentQ.shift();
-  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(currentQ));
-  isSyncing = false;
-  updateSyncStatus();
-  if (currentQ.length > 0) {
-    setTimeout(syncQueue, 500);
+
+function clearQueue() {
+  if(confirm('Kosongkan antrean? (Jika ada data yang tersangkut)')) {
+    localStorage.removeItem(QUEUE_KEY);
+    isSyncing = false;
+    updateUI();
   }
 }
-
-function kosongkanAntreanManual() {
-  if (confirm('Kosongkan daftar antrean di memori HP ini?')) {
-    localStorage.removeItem(OFFLINE_QUEUE_KEY);
-    isSyncing = false;
-    updateSyncStatus();
-  }
-}
-
-function resetApp() {
-  draftTKH = [];
-  draftBahan = [];
-  document.getElementById('daftarTKHContainer').innerHTML = '';
-  document.getElementById('bahanContainer').innerHTML = '';
-  document.getElementById('sektor').value = '';
-  document.getElementById('pic').value = '';
-  document.getElementById('kegiatan').value = '';
-  goToStep(1);
-}
-
-window.addEventListener('online', updateSyncStatus);
-window.addEventListener('offline', updateSyncStatus);
 </script>
 </body>
 </html>
