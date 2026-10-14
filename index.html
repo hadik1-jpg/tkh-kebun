@@ -334,6 +334,24 @@ function clearQueue() {
     updateUI();
   }
 }
+  // Sensor otomatis: Langsung kirim begitu HP mendeteksi koneksi internet
+window.addEventListener('online', function() {
+  updateUI();
+  runSync();
+});
+
+window.addEventListener('offline', updateUI);
+
+// Pengecekan cadangan setiap 5 detik jika ada antrean tertinggal
+setInterval(function() {
+  if (navigator.onLine) {
+    const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+    if (q.length > 0 && !isSyncing) {
+      updateUI();
+      runSync();
+    }
+  }
+}, 5000);
 </script>
 </body>
 </html>
