@@ -21,7 +21,7 @@
     .btn { border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 12px; }
     .btn-primary { background: #164f45; color: white; }
     .btn-secondary { background: #e4f1ee; color: #164f45; }
-    .btn-danger { background: #f9e2e2; color: #b52e2e; padding: 8px 12px; font-size: 12px; width: auto; margin-top:8px;}
+    .btn-danger { background: #f9e2e2; color: #b52e2e; padding: 8px 12px; font-size: 12px; width: auto; margin-top: 8px; }
     .btn-row { display: flex; gap: 10px; margin-top: 16px; }
     .item-card { border: 1px solid #dce4e2; border-radius: 10px; padding: 12px; margin-top: 10px; background: #fafcfb; }
     .hidden { display: none !important; }
@@ -37,41 +37,96 @@
 
   <div id="syncBar" class="sync-bar">
     <span id="syncText">● Online (Server V3)</span>
-    <span id="queueBadge" onclick="clearQueue()" style="cursor: pointer; text-decoration: underline;" title="Ketuk untuk paksa reset antrean jika error">0 Antrean (Reset)</span>
+    <span id="queueBadge" onclick="clearQueue()" style="cursor: pointer; text-decoration: underline;" title="Ketuk untuk reset antrean">0 Antrean (Reset)</span>
   </div>
 
   <!-- STEP 1: INFO -->
   <div id="step1" class="step-card">
     <div class="step-title">1. Form Informasi Harian</div>
-    <label>Tanggal</label><input type="date" id="tanggal">
+    <label>Tanggal</label>
+    <input type="date" id="tanggal">
+
     <label>Sektor</label>
     <select id="sektor">
-      <option value="">-- Pilih --</option><option value="S001">Sektor 1</option><option value="S002">Sektor 2</option>
+      <option value="">-- Pilih Sektor --</option>
+      <option value="S001">Sektor 1</option>
+      <option value="S002">Sektor 2</option>
     </select>
+
     <label>Mandor</label>
     <select id="pic">
-      <option value="">-- Pilih --</option><option value="PIC001">Wahyuni</option><option value="PIC002">Aroka</option><option value="PIC003">Suparso</option>
+      <option value="">-- Pilih PIC / Mandor --</option>
+      <option value="PIC001">Wahyuni</option>
+      <option value="PIC002">Aroka</option>
+      <option value="PIC003">Suparso</option>
     </select>
-    <button class="btn btn-primary" onclick="go(2)">Lanjut &gt;</button>
+
+    <button type="button" class="btn btn-primary" onclick="go(2)">Lanjut &gt;</button>
   </div>
 
   <!-- STEP 2: KEGIATAN -->
   <div id="step2" class="step-card hidden">
     <div class="step-title">2. Form Kegiatan</div>
-    <label>Kegiatan</label>
+    <label>Jenis Kegiatan</label>
     <select id="kegiatan">
-      <option value="">-- Pilih --</option><option value="1">Pemupukan NPK (TBM)</option><option value="2">Pemupukan Urea (TBM)</option><option value="11">Babad / Babat Rumput Manual</option><option value="19">Panen Petik Merah</option>
+      <option value="">-- Pilih Kegiatan --</option>
+      <option value="1">Pemupukan NPK (TBM)</option>
+      <option value="2">Pemupukan Urea (TBM)</option>
+      <option value="3">Pemupukan KCL (TBM)</option>
+      <option value="4">Pemupukan NPK (TM)</option>
+      <option value="5">Pemupukan Urea (TM)</option>
+      <option value="6">Pemupukan KCL (TM)</option>
+      <option value="7">Pemupukan Kompos / Organik</option>
+      <option value="8">Penyemprotan Herbisida (Gulma)</option>
+      <option value="9">Penyemprotan Insektisida (Hama)</option>
+      <option value="10">Penyemprotan Fungisida (Penyakit)</option>
+      <option value="11">Babad / Babat Rumput Manual</option>
+      <option value="12">Babat Rumput Mekanis (Mesin)</option>
+      <option value="13">Nyiang Kiring / Piringan</option>
+      <option value="14">Pangkas Lepas / Bentuk (TBM)</option>
+      <option value="15">Pangkas Lepas / Produksi (TM)</option>
+      <option value="16">Pangkas Wiwilan / Tunas Air</option>
+      <option value="17">Pangkas Lepas Kepala / Toping</option>
+      <option value="18">Pangkas Rejuvenasi / Reboisasi</option>
+      <option value="19">Panen Petik Merah</option>
+      <option value="20">Panen Petik Campur</option>
+      <option value="21">Panen Asalan</option>
+      <option value="22">Sulam Tanaman Kopi</option>
+      <option value="23">Sulam Tanaman Pelindung</option>
+      <option value="24">Pembuatan Lubang Tanam</option>
+      <option value="25">Pembuatan Rorak / Kebun</option>
+      <option value="26">Pembersihan Saluran Air / Drainase</option>
+      <option value="27">Perbaikan Jalan Kebun / Teras</option>
+      <option value="28">Pembuatan Naungan / Pelindung</option>
+      <option value="29">Pengangkutan Hasil Panen</option>
+      <option value="30">Pengangkutan Pupuk / Bahan</option>
+      <option value="31">Pembersihan Kebun Umum</option>
     </select>
     
     <label>Bahan (Opsional)</label>
-    <select id="bahanId"><option value="">-- Tanpa Bahan --</option><option value="B1">Pupuk NPK</option><option value="B2">Dexlite</option></select>
+    <select id="bahanId">
+      <option value="">-- Tanpa Bahan --</option>
+      <option value="1">Pertamax</option>
+      <option value="2">Dexlite</option>
+      <option value="3">Pupuk NPK</option>
+      <option value="4">Pupuk Urea</option>
+      <option value="5">Pupuk KCL</option>
+      <option value="6">Herbisida RoundUp</option>
+      <option value="7">Oli Mesin</option>
+    </select>
     <div class="row">
-      <div><label>Jml</label><input type="number" id="bahanJml" placeholder="0"></div>
-      <div><label>Sat</label><input type="text" id="bahanSat" placeholder="Kg/Lt"></div>
+      <div>
+        <label>Jumlah</label>
+        <input type="number" id="bahanJml" placeholder="0">
+      </div>
+      <div>
+        <label>Satuan Bahan</label>
+        <input type="text" id="bahanSat" placeholder="Kg / Liter">
+      </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="go(1)">&lt; Kembali</button>
-      <button class="btn btn-primary" onclick="go(3)">Lanjut &gt;</button>
+      <button type="button" class="btn btn-secondary" onclick="go(1)">&lt; Kembali</button>
+      <button type="button" class="btn btn-primary" onclick="go(3)">Lanjut &gt;</button>
     </div>
   </div>
 
@@ -81,84 +136,140 @@
     <div class="item-card">
       <label>Nama TKH</label>
       <select id="tkhId">
-        <option value="">-- Pilih --</option><option value="T001">Anita</option><option value="T002">Ari Kristianto</option>
+        <option value="">-- Pilih TKH --</option>
+        <option value="1707044808881001">Anita</option>
+        <option value="1703081312800002">Ari Kristianto</option>
+        <option value="1707040606010003">Arjuna Utama</option>
+        <option value="1707076002880001">Atita</option>
+        <option value="1709032412710001">Asmawi</option>
+        <option value="1709032412710002">Budi Santoso</option>
+        <option value="1709032412710003">Dedi Kurniawan</option>
+        <option value="1709032412710004">Eko Prasetyo</option>
+        <option value="1709032412710005">Fitriani</option>
+        <option value="1709032412710006">Hendrikus</option>
+        <option value="1709032412710007">Iwan Setiawan</option>
+        <option value="1709032412710008">Joko Susilo</option>
+        <option value="1709032412710009">Kartini</option>
+        <option value="1709032412710010">Luki Gunawan</option>
+        <option value="1709032412710011">Marlina</option>
+        <option value="1709032412710012">Nurdin</option>
+        <option value="1709032412710013">Oman Rohman</option>
+        <option value="1709032412710014">Putri Rahayu</option>
+        <option value="1709032412710015">Rahmat Hidayat</option>
+        <option value="1709032412710016">Samsul Bahri</option>
+        <option value="1709032412710017">Titin Sumarni</option>
+        <option value="1709032412710018">Ujang Supriatna</option>
+        <option value="1709032412710019">Yayan Mulyana</option>
+        <option value="1709032412710020">Zulkifli</option>
       </select>
       <div class="row">
-        <div><label>Mulai</label><input type="time" id="jamM" value="07:30"></div>
-        <div><label>Selesai</label><input type="time" id="jamS" value="11:00"></div>
+        <div>
+          <label>Mulai</label>
+          <input type="time" id="jamM" value="07:30">
+        </div>
+        <div>
+          <label>Selesai</label>
+          <input type="time" id="jamS" value="11:00">
+        </div>
       </div>
       <div class="row">
-        <div><label>Blok</label><input type="text" id="blok" placeholder="C10"></div>
-        <div><label>Hasil</label><input type="number" id="hasil" placeholder="Jml"></div>
+        <div>
+          <label>Blok</label>
+          <input type="text" id="blok" placeholder="Contoh: C10">
+        </div>
+        <div>
+          <label>Hasil</label>
+          <input type="number" id="hasil" placeholder="Jumlah">
+        </div>
       </div>
-      <label>Satuan</label><select id="satuanKerja"><option value="Batang">Batang</option><option value="Kg">Kg</option></select>
-      <button class="btn btn-secondary" onclick="addTkh()">+ Tambah Pekerja</button>
+      <label>Satuan Pekerjaan</label>
+      <select id="satuanKerja">
+        <option value="Batang">Batang</option>
+        <option value="Ha">Ha</option>
+        <option value="Kg">Kg</option>
+        <option value="Liter">Liter</option>
+        <option value="Tangki">Tangki</option>
+        <option value="Lubang">Lubang</option>
+        <option value="Meter">Meter</option>
+      </select>
+      <button type="button" class="btn btn-secondary" onclick="addTkh()">+ Tambah Pekerja</button>
     </div>
     
     <div id="listTkh"></div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="go(2)">&lt; Kembali</button>
-      <button class="btn btn-primary" onclick="go(4)">Preview &gt;</button>
+      <button type="button" class="btn btn-secondary" onclick="go(2)">&lt; Kembali</button>
+      <button type="button" class="btn btn-primary" onclick="go(4)">Preview &gt;</button>
     </div>
   </div>
 
   <!-- STEP 4: PREVIEW -->
   <div id="step4" class="step-card hidden">
-    <div class="step-title">4. Simpan</div>
-    <button class="btn btn-primary" style="background:#23633b;" onclick="saveData()">✔ SIMPAN SEKARANG</button>
-    <button class="btn btn-secondary" onclick="go(3)">&lt; Batal / Edit</button>
+    <div class="step-title">4. Simpan Kegiatan</div>
+    <button type="button" class="btn btn-primary" style="background:#23633b;" onclick="saveData()">✔ SIMPAN SEKARANG</button>
+    <button type="button" class="btn btn-secondary" onclick="go(3)">&lt; Batal / Edit</button>
   </div>
 </div>
 
 <script>
-// =============== PERHATIAN: PASTE URL DEPLOYMENT BARU DI SINI ===============
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwL6NATZcHPja6S6cPpMulkYDki0GPAybRgCJgnyJm3JbnR3fbX0WCTZfQ0SVUMMDBI/exec';
-// ==============================================================================
-
 const QUEUE_KEY = 'TKH_V3_Q';
 let draftTkh = [];
 let isSyncing = false;
 
 window.onload = function() {
-  document.getElementById('tanggal').value = new Date().toISOString().substring(0,10);
+  document.getElementById('tanggal').value = new Date().toISOString().substring(0, 10);
   updateUI();
   if (navigator.onLine) runSync();
 };
 
 function go(step) {
-  for(let i=1; i<=4; i++) document.getElementById('step'+i).classList.add('hidden');
-  document.getElementById('step'+step).classList.remove('hidden');
+  for (let i = 1; i <= 4; i++) document.getElementById('step' + i).classList.add('hidden');
+  document.getElementById('step' + step).classList.remove('hidden');
 }
 
 function addTkh() {
   const sel = document.getElementById('tkhId');
-  if(!sel.value) return alert('Pilih TKH');
+  const hasil = document.getElementById('hasil').value;
+  const blok = document.getElementById('blok').value.trim();
+  if (!sel.value) return alert('Pilih TKH terlebih dahulu');
+  if (!hasil || !blok) return alert('Lengkapi Blok dan Hasil pekerjaan');
+
   draftTkh.push({
     tkh: { id: sel.value, nama: sel.options[sel.selectedIndex].text },
     jamMulai: document.getElementById('jamM').value,
     jamSelesai: document.getElementById('jamS').value,
-    blok: document.getElementById('blok').value,
-    prestasi: document.getElementById('hasil').value,
+    blok: blok,
+    prestasi: hasil,
     satuan: document.getElementById('satuanKerja').value
   });
   renderTkh();
+  document.getElementById('hasil').value = '';
 }
 
 function renderTkh() {
   const c = document.getElementById('listTkh');
   c.innerHTML = '';
   draftTkh.forEach((t, i) => {
-    c.innerHTML += `<div class="item-card"><b>${t.tkh.nama}</b> (Blok ${t.blok}) - ${t.prestasi} ${t.satuan} <button class="btn-danger" onclick="draftTkh.splice(${i},1); renderTkh();">Hapus</button></div>`;
+    c.innerHTML += `
+      <div class="item-card">
+        <b>${t.tkh.nama}</b> (Blok ${t.blok})<br>
+        ${t.prestasi} ${t.satuan} [${t.jamMulai} - ${t.jamSelesai}]
+        <button type="button" class="btn-danger" onclick="draftTkh.splice(${i}, 1); renderTkh();">Hapus</button>
+      </div>`;
   });
 }
 
 function saveData() {
-  if(!draftTkh.length) return alert('Belum ada TKH!');
+  if (!draftTkh.length) return alert('Belum ada TKH yang ditambahkan! Klik tombol "+ Tambah Pekerja" terlebih dahulu.');
   
   const selSek = document.getElementById('sektor');
   const selPic = document.getElementById('pic');
   const selKeg = document.getElementById('kegiatan');
   const selBah = document.getElementById('bahanId');
+
+  if (!selSek.value || !selPic.value || !selKeg.value) {
+    return alert('Pastikan Tanggal, Sektor, Mandor, dan Jenis Kegiatan sudah dipilih.');
+  }
 
   const payload = {
     clientTransactionId: 'TX-' + Date.now(),
@@ -174,13 +285,14 @@ function saveData() {
   q.push(payload);
   localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
   
-  draftTkh = []; renderTkh(); go(1);
-  alert('Data masuk antrean (memori HP).');
+  draftTkh = [];
+  renderTkh();
+  go(1);
+  alert('Data berhasil disimpan dan masuk antrean pengiriman.');
   updateUI();
   runSync();
 }
 
-// MESIN SINKRONISASI BYPASS CORS GET
 function runSync() {
   const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
   if (!q.length || isSyncing) return;
@@ -195,15 +307,17 @@ function runSync() {
   .then(() => {
     setTimeout(() => {
       const liveQ = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-      liveQ.shift(); // Buang yang berhasil
+      liveQ.shift();
       localStorage.setItem(QUEUE_KEY, JSON.stringify(liveQ));
       isSyncing = false;
       updateUI();
-      if(liveQ.length > 0) runSync();
-    }, 1500); // Tunggu server nulis ke 3 sheet
+      if (liveQ.length > 0) runSync();
+    }, 1500);
   })
   .catch((err) => {
-    isSyncing = false; updateUI();
+    console.warn('Gagal sinkron:', err);
+    isSyncing = false;
+    updateUI();
   });
 }
 
@@ -214,7 +328,7 @@ function updateUI() {
 }
 
 function clearQueue() {
-  if(confirm('Kosongkan antrean? (Jika ada data yang tersangkut)')) {
+  if (confirm('Kosongkan antrean transaksi di HP ini?')) {
     localStorage.removeItem(QUEUE_KEY);
     isSyncing = false;
     updateUI();
