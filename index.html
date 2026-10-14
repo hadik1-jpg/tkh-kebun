@@ -48,7 +48,7 @@
 
   <div id="syncBar" class="sync-bar">
     <span id="syncText">● Online (Koneksi Langsung V3.2)</span>
-    <span id="queueBadge">0 antrean</span>
+    <span id="queueBadge" onclick="kosongkanAntreanManual()" style="cursor: pointer; text-decoration: underline;" title="Ketuk untuk bersihkan antrean">0 antrean</span>
   </div>
 
   <!-- STEP 1: INFORMASI HARIAN -->
@@ -489,19 +489,39 @@ function syncQueue() {
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
     body: params.toString()
-  }).then(function() {
-    const currentQ = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
-    currentQ.shift();
-    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(currentQ));
+  })
+  .then(function() {
+    selesaikanAntrean();
+  })
+  .catch(function(err) {
+    // Google Apps Script meredirect respons sehingga browser masuk ke blok catch,
+    // padahal data sudah berhasil masuk ke spreadsheet.
+    if (navigator.onLine) {
+      selesaikanAntrean();
+    } else {
+      console.warn('Gagal sync (offline):', err);
+      isSyncing = false;
+    }
+  });
+}
+
+function selesaikanAntrean() {
+  const currentQ = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+  currentQ.shift();
+  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(currentQ));
+  isSyncing = false;
+  updateSyncStatus();
+  if (currentQ.length > 0) {
+    setTimeout(syncQueue, 500);
+  }
+}
+
+function kosongkanAntreanManual() {
+  if (confirm('Kosongkan daftar antrean di memori HP ini?')) {
+    localStorage.removeItem(OFFLINE_QUEUE_KEY);
     isSyncing = false;
     updateSyncStatus();
-    if (currentQ.length > 0) {
-      setTimeout(syncQueue, 400);
-    }
-  }).catch(function(err) {
-    console.warn('Gagal sync:', err);
-    isSyncing = false;
-  });
+  }
 }
 
 function resetApp() {
