@@ -478,8 +478,12 @@ function syncQueue() {
   const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
   if (!q.length || isSyncing) return;
   isSyncing = true;
-  const item = q[0];
 
+  const bar = document.getElementById('syncBar');
+  const txt = document.getElementById('syncText');
+  txt.textContent = '⏳ Sedang mengirim data ke spreadsheet...';
+
+  const item = q[0];
   const params = new URLSearchParams();
   params.append('action', 'saveFullActivity');
   params.append('payload', JSON.stringify(item));
@@ -487,24 +491,37 @@ function syncQueue() {
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params.toString()
   })
-  .then(function() {
-    selesaikanAntrean();
+  .then(() => {
+    // Karena no-cors selalu selesai di .then setelah request terkirim
+    hapusAntreanSukses();
   })
-  .catch(function(err) {
-    // Google Apps Script meredirect respons sehingga browser masuk ke blok catch,
-    // padahal data sudah berhasil masuk ke spreadsheet.
-    if (navigator.onLine) {
-      selesaikanAntrean();
-    } else {
-      console.warn('Gagal sync (offline):', err);
-      isSyncing = false;
-    }
+  .catch((err) => {
+    // Jika benar-benar offline / gagal jaringan
+    console.warn('Gagal sync:', err);
+    isSyncing = false;
+    updateSyncStatus();
   });
 }
 
+function hapusAntreanSukses() {
+  // Beri jeda 1 detik agar Google Apps Script tuntas menulis ke semua tab
+  setTimeout(() => {
+    const q = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+    q.shift();
+    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
+    isSyncing = false;
+    updateSyncStatus();
+    
+    // Kirim item berikutnya jika ada antrean tersisa
+    const remaining = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+    if (remaining.length > 0) {
+      syncQueue();
+    }
+  }, 1000);
+}
 function selesaikanAntrean() {
   const currentQ = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
   currentQ.shift();
